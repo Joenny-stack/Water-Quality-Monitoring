@@ -9,7 +9,7 @@ class ApiService {
       try {
         // final response = await http.get(Uri.parse('http://\$espIp/status'));
         final response = await http.get(
-          Uri.parse('http://' + espIp + '/status'),
+          Uri.parse('http://$espIp/status'),
         );
 
         if (response.statusCode == 200) {
