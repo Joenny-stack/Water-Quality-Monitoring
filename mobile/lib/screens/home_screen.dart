@@ -12,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Stream<DeviceStatus> _statusStream;
-  final String espIp = '192.168.1.96'; // 👈 Replace with your ESP IP
+  final String espIp = '10.168.1.96'; // 👈 Replace with your ESP IP
 
   @override
   void initState() {
