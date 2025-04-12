@@ -3,8 +3,8 @@
 #include <LiquidCrystal_I2C.h>
 
 // Wi-Fi credentials
-const char* ssid = "GZU EXAMS";
-const char* password = "exam5@2020";
+const char* ssid = "ICT-WIFI";
+const char* password = "ict@2030";
 
 // Web server setup
 ESP8266WebServer server(80);
@@ -60,6 +60,8 @@ void setup() {
   }
   Serial.println("\nWiFi connected. IP address: ");
   Serial.println(WiFi.localIP());
+  lcd.setCursor(0, 0);
+  lcd.print(WiFi.localIP());
 
   server.on("/status", handleStatus);
   server.begin();
@@ -79,7 +81,7 @@ void loop() {
   lcd.print(" %");
 
   if (waterStatus == HIGH) {
-    Serial.println("Water Detected");
+    
   } else {
     Serial.println("No Water Detected");
   }
