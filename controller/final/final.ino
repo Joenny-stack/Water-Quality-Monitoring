@@ -1,10 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <LiquidCrystal_I2C.h>
-
-// Wi-Fi credentials
-const char* ssid = "ICT-WIFI";
-const char* password = "ict@2030";
+#include <WiFiManager.h>  // Add this for captive portal
 
 // Web server setup
 ESP8266WebServer server(80);
@@ -12,7 +9,7 @@ ESP8266WebServer server(80);
 // Hardware pin definitions
 #define LED_PIN LED_BUILTIN
 #define BUZZER_PIN D4
-#define waterLevelPin D3  // Make sure you define the water level sensor pin
+#define waterLevelPin D3
 
 // LCD initialization
 LiquidCrystal_I2C lcd(0x27, 16, 2);  // Adjust address if needed
@@ -32,7 +29,7 @@ void handleStatus() {
   json += "\"connected\": true,";
   json += "\"led_on\": " + String(ledState ? "true" : "false") + ",";
   json += "\"buzzer_on\": " + String(buzzerState ? "true" : "false") + ",";
-  json += "\"turbidity\": " + String(turbidity, 2) + ",";  // 2 decimal places
+  json += "\"turbidity\": " + String(turbidity, 2) + ",";
   json += "\"water_detected\": " + String(waterStatus == HIGH ? "true" : "false");
   json += "}";
 
@@ -45,7 +42,7 @@ void setup() {
   lcd.backlight();
 
   lcd.setCursor(0, 0);
-  lcd.print("Welcome!");
+  lcd.print("Booting...");
   lcd.setCursor(0, 1);
   lcd.print("Turbidity: ");
 
@@ -53,13 +50,15 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(waterLevelPin, INPUT);
 
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  // Wi-FiManager captive portal
+  WiFiManager wm;
+  if (!wm.autoConnect("ESP8266_Setup")) {
+    Serial.println("Failed to connect & timed out");
+    ESP.restart();
+    delay(1000);
   }
-  Serial.println("\nWiFi connected. IP address: ");
-  Serial.println(WiFi.localIP());
+
+  Serial.println("WiFi connected: " + WiFi.localIP().toString());
   lcd.setCursor(0, 0);
   lcd.print(WiFi.localIP());
 
@@ -70,22 +69,21 @@ void setup() {
 void loop() {
   server.handleClient();
 
-  turbidityValue = 1024 - analogRead(A0);  // Read from turbidity sensor
-  turbidity = map(turbidityValue, 0, 1023, 0, 100);  // Convert to percentage
-  waterStatus = digitalRead(waterLevelPin);         // Read water level
+  turbidityValue = 1024 - analogRead(A0);
+  turbidity = map(turbidityValue, 0, 1023, 0, 100);
+  waterStatus = digitalRead(waterLevelPin);
 
   lcd.setCursor(11, 1);
-  lcd.print("     ");  // Clear previous value
+  lcd.print("     ");
   lcd.setCursor(11, 1);
   lcd.print(turbidity);
   lcd.print(" %");
 
   if (waterStatus == HIGH) {
-    
+    // Optional: Add some alert logic here
   } else {
     Serial.println("No Water Detected");
   }
 
   delay(1000);
 }
-
