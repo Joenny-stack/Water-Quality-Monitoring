@@ -2,15 +2,21 @@ class DeviceStatus {
   final bool connected;
   final bool ledOn;
   final bool buzzerOn;
-  final String turbidity;
-  final String waterDetected; // Change to String
+  final bool solenoidClosed;
+  final double ph;
+  final double turbidity;
+  final int waterLevelRaw;
+  final bool waterDetected;
 
   DeviceStatus({
     required this.connected,
     required this.ledOn,
     required this.buzzerOn,
+    required this.solenoidClosed,
+    required this.ph,
     required this.turbidity,
-    required this.waterDetected, // Change to String
+    required this.waterLevelRaw,
+    required this.waterDetected,
   });
 
   factory DeviceStatus.fromJson(Map<String, dynamic> json) {
@@ -18,8 +24,11 @@ class DeviceStatus {
       connected: json['connected'],
       ledOn: json['led_on'],
       buzzerOn: json['buzzer_on'],
-      turbidity: json['turbidity'].toString(),
-      waterDetected: json['water_detected'].toString(), // Parse as String
+      solenoidClosed: json['solenoid_closed'],
+      ph: json['ph'].toDouble(),
+      turbidity: json['turbidity'].toDouble(), // Raw turbidity value
+      waterLevelRaw: json['water_level_raw'],
+      waterDetected: json['water_detected'],
     );
   }
 }
