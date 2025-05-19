@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../models/device_status.dart';
 import '../services/api_service.dart';
 import '../widgets/status_tile.dart';
@@ -14,13 +15,58 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Stream<DeviceStatus> _statusStream = Stream.empty(); // 👈 Initialize with an empty stream
   String espIp = ''; // 👈 Initialize as empty string
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  List<String> _lastAlerts = [];
 
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showIpDialog();
     });
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    // Explicitly create the notification channel for Android 8.0+
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'alert_channel',
+      'Alerts',
+      description: 'Water quality alerts',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+
+  Future<void> _showAlertNotification(List<String> alerts) async {
+    if (alerts.isEmpty) return;
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Water Quality Alert',
+      alerts.join('\n'),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'alert_channel',
+          'Alerts',
+          channelDescription: 'Water quality alerts',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
+        ),
+      ),
+    );
   }
 
   void _showIpDialog() async {
@@ -129,6 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasData) {
             final data = snapshot.data!;
+            final alerts = data.checkAlerts();
+            if (alerts.isNotEmpty && alerts.toString() != _lastAlerts.toString()) {
+              _showAlertNotification(alerts);
+              _lastAlerts = List.from(alerts);
+            }
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
