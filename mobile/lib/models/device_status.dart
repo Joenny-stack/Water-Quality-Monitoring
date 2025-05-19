@@ -30,4 +30,20 @@ class DeviceStatus {
       waterLevelRaw: json['water_level_raw'],
     );
   }
+
+  List<String> checkAlerts() {
+    List<String> alerts = [];
+    // Reasonable thresholds for water quality
+    if (ph < 6.5 || ph > 8.5) {
+      alerts.add("pH is out of range (6.5-8.5). Safe range for drinking water.");
+    }
+    if (turbidity > 1000.0) {
+      alerts.add("Turbidity is high (>1000 NTU). Water may be unsafe.");
+    }
+    if (waterLevelRaw < 10) {
+      alerts.add("Water level is low (<10 raw units). Check supply.");
+    }
+    // Add more checks as needed
+    return alerts;
+  }
 }

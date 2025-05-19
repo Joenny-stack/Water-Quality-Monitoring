@@ -196,6 +196,47 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Alerts",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            if (data.checkAlerts().isEmpty)
+                              const Text(
+                                "No alerts at the moment.",
+                                style: TextStyle(fontSize: 16),
+                              )
+                            else
+                              ...data.checkAlerts().map((alert) => ListTile(
+                                    leading: const Icon(
+                                      Icons.warning,
+                                      color: Colors.red,
+                                    ),
+                                    title: Text(
+                                      alert,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );
