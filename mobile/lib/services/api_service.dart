@@ -10,8 +10,8 @@ class ApiService {
       try {
         log('Attempting to fetch status from http://$espIp/status'); // Log the request
         final response = await http
-            .get(Uri.parse('http://10.40.147.177/status'))
-            .timeout(const Duration(seconds: 10)); // Add timeout
+            .get(Uri.parse('http://$espIp/status'))
+            .timeout(const Duration(seconds: 10)); // Use the provided espIp
 
         log('Response status: ${response.statusCode}'); // Log response status
         log('Response body: ${response.body}'); // Log response body

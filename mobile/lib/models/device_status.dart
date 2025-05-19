@@ -6,7 +6,7 @@ class DeviceStatus {
   final double ph;
   final double turbidity;
   final int waterLevelRaw;
-  final bool waterDetected;
+
 
   DeviceStatus({
     required this.connected,
@@ -16,7 +16,7 @@ class DeviceStatus {
     required this.ph,
     required this.turbidity,
     required this.waterLevelRaw,
-    required this.waterDetected,
+
   });
 
   factory DeviceStatus.fromJson(Map<String, dynamic> json) {
@@ -26,9 +26,8 @@ class DeviceStatus {
       buzzerOn: json['buzzer_on'],
       solenoidClosed: json['solenoid_closed'],
       ph: json['ph'].toDouble(),
-      turbidity: json['turbidity'].toDouble(), // Raw turbidity value
+      turbidity: json['turbidity'].toDouble(),
       waterLevelRaw: json['water_level_raw'],
-      waterDetected: json['water_detected'],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/device_status.dart';
 import '../services/api_service.dart';
 import '../widgets/status_tile.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,7 +62,66 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Smart Hydroponics")),
+      appBar: AppBar(
+        title: const Text("Water Quality"),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: const Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsScreen(
+                      currentIp: espIp,
+                      onIpChanged: (newIp) {
+                        setState(() {
+                          espIp = newIp;
+                          _statusStream = ApiService.fetchStatusStream(espIp);
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showIpDialog, // 👈 Allow retry by showing the IP dialog again
+        child: const Icon(Icons.edit),
+      ),
       body: StreamBuilder<DeviceStatus>(
         stream: _statusStream,
         builder: (context, snapshot) {
@@ -131,12 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             value: data.waterLevelRaw.toString(),
                             icon: Icons.straighten,
                             color: Colors.blue,
-                          ),
-                          StatusTile(
-                            label: "Water Detected",
-                            value: data.waterDetected ? "Yes" : "No",
-                            icon: Icons.water,
-                            color: data.waterDetected ? Colors.green : Colors.grey,
                           ),
                         ],
                       ),

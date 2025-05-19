@@ -123,7 +123,7 @@ void loop() {
   lcd.print(turbidity, 1);
 
   // --- Alerts and Solenoid control ---
-  if (waterLevelRaw > 200) {
+  if (waterLevelRaw > 150) {
     digitalWrite(BUZZER_PIN, HIGH);
     digitalWrite(SOLENOID_PIN, LOW); // Relay ON (valve CLOSED)
     buzzerState = true;
