@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/database_helper.dart'; // Import DatabaseHelper
 
 class SettingsScreen extends StatefulWidget {
   final String currentIp;
@@ -11,7 +12,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _ipController;
-  bool _showNotifications = false;
 
   @override
   void initState() {
@@ -34,37 +34,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Current ESP IP Address:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Current System IP Address:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(widget.currentIp, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 24),
             TextField(
               controller: _ipController,
               decoration: const InputDecoration(
-                labelText: 'Change ESP IP Address',
+                labelText: 'Change System IP Address',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Show Notifications', style: TextStyle(fontSize: 16)),
-                Switch(
-                  value: _showNotifications,
-                  onChanged: (val) {
-                    setState(() {
-                      _showNotifications = val;
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 widget.onIpChanged(_ipController.text);
+                // Save to database as last used IP
+                // ignore: use_build_context_synchronously
+                await DatabaseHelper().saveLastUsedIp(_ipController.text);
                 Navigator.pop(context);
               },
               child: const Text('Save'),

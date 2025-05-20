@@ -99,4 +99,34 @@ class DatabaseHelper {
       orderBy: 'timestamp DESC',
     );
   }
+
+  Future<void> saveLastUsedIp(String ip) async {
+    final database = await db;
+    await database.execute('''
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    ''');
+    await database.insert(
+      'settings',
+      {'key': 'last_ip', 'value': ip},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getLastUsedIp() async {
+    final database = await db;
+    await database.execute('''
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    ''');
+    final result = await database.query('settings', where: 'key = ?', whereArgs: ['last_ip']);
+    if (result.isNotEmpty) {
+      return result.first['value'] as String?;
+    }
+    return null;
+  }
 }
