@@ -95,24 +95,31 @@ void setup() {
 void loop() {
   server.handleClient();
 
-  // --- Read sensors ---
-  int turbidityRaw = readMux(TURBIDITY_CHANNEL);
-  float voltage = turbidityRaw * (3.3 / 1023.0);
-  turbidity = -1120.4 * sq(voltage) + 5742.3 * voltage - 4352.9;
-  if (turbidity < 0) turbidity = 0;
+  // --- Read and average turbidity ---
+  int sum = 0;
+  for (int i = 0; i < 10; i++) {
+    sum += readMux(TURBIDITY_CHANNEL);
+    delay(10);
+  }
+  int turbidityRaw = sum / 10;
+  turbidity = map(turbidityRaw, 0, 640, 100, 0);  // Adjust 640 if needed
 
+  // --- Read pH and convert ---
   int phRaw = readMux(PH_CHANNEL);
-  phValue = (float)phRaw * (14.0 / 1023.0);
+  float voltage = phRaw * (3.3 / 1023.0);          // Convert ADC reading to voltage
+  phValue = 7 + ((2.5 - voltage) / 0.18);          // Convert voltage to pH value
 
+  // --- Read water level ---
   waterLevelRaw = readMux(WATER_LEVEL_CHANNEL);
 
   // --- Serial debug output ---
   Serial.println("=== Sensor Readings ===");
-  Serial.println("Turbidity RAW: " + String(turbidityRaw));
-  Serial.println("Turbidity (NTU): " + String(turbidity, 2));
-  Serial.println("PH RAW: " + String(phRaw));
-  Serial.println("PH: " + String(phValue, 2));
-  Serial.println("Water Level RAW: " + String(waterLevelRaw));
+  Serial.print("Turbidity RAW: "); Serial.print(turbidityRaw);
+  Serial.print(" -> NTU: "); Serial.println(turbidity);
+  Serial.print("PH RAW: "); Serial.print(phRaw);
+  Serial.print(" -> Voltage: "); Serial.print(voltage, 3);
+  Serial.print(" V, PH: "); Serial.println(phValue, 2);
+  Serial.print("Water Level RAW: "); Serial.println(waterLevelRaw);
   Serial.println("========================");
 
   // --- LCD Display ---
@@ -121,6 +128,7 @@ void loop() {
   lcd.print(phValue, 1);
   lcd.print(" T:");
   lcd.print(turbidity, 1);
+  lcd.print("   "); // Clear leftover chars
 
   // --- Alerts and Solenoid control ---
   if (waterLevelRaw > 150) {
@@ -136,7 +144,6 @@ void loop() {
     solenoidState = false;
     Serial.println("Water Level LOW - Buzzer OFF, Valve OPEN");
   }
-
 
   delay(1000);
 }

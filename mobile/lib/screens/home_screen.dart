@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../models/device_status.dart';
 import '../services/api_service.dart';
+import '../services/database_helper.dart';
 import '../widgets/status_tile.dart';
 import 'settings_screen.dart';
+import 'readings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String espIp = ''; // 👈 Initialize as empty string
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   List<String> _lastAlerts = [];
+  int _readingSaveCounter = 0;
 
   @override
   void initState() {
@@ -141,6 +144,19 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.analytics),
+              title: const Text('Readings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ReadingsScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
@@ -175,10 +191,20 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasData) {
             final data = snapshot.data!;
+            // Save reading to database every 30th fetch (approx every minute)
+            _readingSaveCounter++;
+            if (_readingSaveCounter >= 30) {
+              DatabaseHelper().insertReading(data);
+              _readingSaveCounter = 0;
+            }
             final alerts = data.checkAlerts();
             if (alerts.isNotEmpty && alerts.toString() != _lastAlerts.toString()) {
               _showAlertNotification(alerts);
               _lastAlerts = List.from(alerts);
+              // Log alerts in the database
+              for (final alert in alerts) {
+                DatabaseHelper().insertAlert(alert);
+              }
             }
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -206,12 +232,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             value: data.connected ? "Connected" : "Disconnected",
                             icon: Icons.wifi,
                             color: data.connected ? Colors.green : Colors.red,
-                          ),
-                          StatusTile(
-                            label: "LED",
-                            value: data.ledOn ? "On" : "Off",
-                            icon: Icons.lightbulb,
-                            color: data.ledOn ? Colors.yellow : Colors.grey,
                           ),
                           StatusTile(
                             label: "Buzzer",
