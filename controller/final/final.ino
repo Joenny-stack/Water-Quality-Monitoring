@@ -32,6 +32,10 @@ bool buzzerState = false;
 bool ledState = false;
 bool solenoidState = false;
 
+// LCD switching
+unsigned long lastDisplaySwitch = 0;
+bool showIpOnLcd = true;
+
 // Multiplexer read
 int readMux(byte channel) {
   digitalWrite(MUX_S0, bitRead(channel, 0));
@@ -84,9 +88,14 @@ void setup() {
   }
 
   Serial.println("WiFi connected: " + WiFi.localIP().toString());
+
   lcd.clear();
   lcd.setCursor(0, 0);
+  lcd.print("IP:");
+  lcd.setCursor(0, 1);
   lcd.print(WiFi.localIP());
+  showIpOnLcd = true;
+  lastDisplaySwitch = millis();
 
   server.on("/status", handleStatus);
   server.begin();
@@ -107,7 +116,7 @@ void loop() {
   // --- Read pH and convert ---
   int phRaw = readMux(PH_CHANNEL);
   float voltage = phRaw * (3.3 / 1023.0);          // Convert ADC reading to voltage
-  phValue = 7 + ((2.5 - voltage) / 0.18);          // Convert voltage to pH value
+  phValue = 7 + ((2.2 - voltage) / 0.18);          // Convert voltage to pH value
 
   // --- Read water level ---
   waterLevelRaw = readMux(WATER_LEVEL_CHANNEL);
@@ -122,13 +131,30 @@ void loop() {
   Serial.print("Water Level RAW: "); Serial.println(waterLevelRaw);
   Serial.println("========================");
 
-  // --- LCD Display ---
-  lcd.setCursor(0, 1);
-  lcd.print("PH:");
-  lcd.print(phValue, 1);
-  lcd.print(" T:");
-  lcd.print(turbidity, 1);
-  lcd.print("   "); // Clear leftover chars
+  // --- LCD Display Alternating ---
+  if (millis() - lastDisplaySwitch > 5000) {
+    showIpOnLcd = !showIpOnLcd;
+    lastDisplaySwitch = millis();
+    lcd.clear();
+  }
+
+  if (showIpOnLcd) {
+    lcd.setCursor(0, 0);
+    lcd.print("IP:");
+    lcd.setCursor(0, 1);
+    lcd.print(WiFi.localIP());
+  } else {
+    lcd.setCursor(0, 0);
+    lcd.print("PH:");
+    lcd.print(phValue, 1);
+    lcd.print(" T:");
+    lcd.print(turbidity, 1);
+    lcd.print("   ");
+    lcd.setCursor(0, 1);
+    lcd.print("LEVEL:");
+    lcd.print(waterLevelRaw);
+    lcd.print("       ");
+  }
 
   // --- Alerts and Solenoid control ---
   if (waterLevelRaw > 150) {

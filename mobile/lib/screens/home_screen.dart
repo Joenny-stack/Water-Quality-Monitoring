@@ -268,12 +268,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             color: data.connected ? Colors.green : Colors.red,
                           ),
                           StatusTile(
-                            label: "Buzzer",
-                            value: data.buzzerOn ? "On" : "Off",
-                            icon: Icons.notifications,
-                            color: data.buzzerOn ? Colors.red : Colors.grey,
-                          ),
-                          StatusTile(
                             label: "Solenoid",
                             value: data.solenoidClosed ? "Closed" : "Open",
                             icon: Icons.lock,
