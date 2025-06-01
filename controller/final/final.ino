@@ -157,15 +157,15 @@ void loop() {
   }
 
   // --- Alerts and Solenoid control ---
-  if (waterLevelRaw > 235) {
+  if (waterLevelRaw > 280) {
     digitalWrite(BUZZER_PIN, HIGH);
-    digitalWrite(SOLENOID_PIN, LOW); // Relay ON (valve CLOSED)
+    digitalWrite(SOLENOID_PIN, HIGH); // Relay ON (valve CLOSED)
     buzzerState = true;
     solenoidState = true;
     Serial.println("Water Level HIGH - Buzzer ON, Valve CLOSED");
   } else {
     digitalWrite(BUZZER_PIN, LOW);
-    digitalWrite(SOLENOID_PIN, HIGH); // Relay OFF (valve OPEN)
+    digitalWrite(SOLENOID_PIN, LOW); // Relay OFF (valve OPEN)
     buzzerState = false;
     solenoidState = false;
     Serial.println("Water Level LOW - Buzzer OFF, Valve OPEN");

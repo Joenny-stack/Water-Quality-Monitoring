@@ -44,7 +44,7 @@ class DeviceStatus {
       alerts.add("Tank is below half (very low water level).");
     } else if (waterLevelRaw >= 220 && waterLevelRaw <= 234) {
       alerts.add("Tank is almost full.");
-    } else if (waterLevelRaw >= 235) {
+    } else if (waterLevelRaw >= 257) {
       alerts.add("Tank is full, Supply is closed.");
     }
     // Add more checks as needed
