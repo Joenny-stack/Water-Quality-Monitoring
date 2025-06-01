@@ -157,7 +157,7 @@ void loop() {
   }
 
   // --- Alerts and Solenoid control ---
-  if (waterLevelRaw > 150) {
+  if (waterLevelRaw > 235) {
     digitalWrite(BUZZER_PIN, HIGH);
     digitalWrite(SOLENOID_PIN, LOW); // Relay ON (valve CLOSED)
     buzzerState = true;

@@ -40,7 +40,11 @@ class DeviceStatus {
     if (turbidity > 1000.0) {
       alerts.add("Turbidity is high (>1000 NTU). Water may be unsafe.");
     }
-    if (waterLevelRaw > 150) {
+    if (waterLevelRaw < 12) {
+      alerts.add("Tank is below half (very low water level).");
+    } else if (waterLevelRaw >= 220 && waterLevelRaw <= 234) {
+      alerts.add("Tank is almost full.");
+    } else if (waterLevelRaw >= 235) {
       alerts.add("Tank is full, Supply is closed.");
     }
     // Add more checks as needed
