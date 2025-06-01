@@ -37,8 +37,8 @@ class DeviceStatus {
     if (ph < 6.5 || ph > 8.5) {
       alerts.add("pH is out of range (6.5-8.5). Safe range for drinking water.");
     }
-    if (turbidity > 1000.0) {
-      alerts.add("Turbidity is high (>1000 NTU). Water may be unsafe.");
+    if (turbidity > 20.0) {
+      alerts.add("Turbidity is high (>20 NTU). Water may be unsafe.");
     }
     if (waterLevelRaw < 12) {
       alerts.add("Tank is below half (very low water level).");
